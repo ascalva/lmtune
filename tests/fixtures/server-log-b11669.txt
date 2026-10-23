@@ -1,0 +1,52 @@
+0.00.061.339 I srv  llama_server: initializing ...
+0.00.061.346 I cmn  common_param: common_params_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+0.00.063.394 I srv    load_model: loading model '/Users/me/models/qwen38/Qwen3.8-27B-Q4_0.gguf'
+0.01.988.319 I cmn          init: llama threadpool init, n_threads = 8
+0.02.158.724 I common_speculative_init_result: creating MTP draft context against the target model '/Users/me/models/qwen38/Qwen3.8-27B-Q4_0.gguf'
+0.02.196.961 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 65536, kv_unified = 'false'
+0.02.272.208 W srv          init: chat template supports preserving reasoning, it is enabled by default (may use more tokens, disable via --no-reasoning-preserve)
+0.02.272.222 I srv  llama_server: model loaded
+0.02.272.225 I srv  llama_server: listening on http://127.0.0.1:8080
+0.48.804.823 I slot get_availabl: id  0 | task -1 | selected slot by LRU, n_tokens = 0, t_last = -1
+0.48.804.950 I slot launch_slot_: id  0 | task 3 | processing task, is_child = 0
+0.50.512.579 I slot print_timing: id  0 | task 3 | prompt eval time =    1224.33 ms /    55 tokens (   22.26 ms per token,    44.92 tokens per second)
+0.50.512.582 I slot print_timing: id  0 | task 3 |        eval time =     483.19 ms /     8 tokens (   69.03 ms per token,    14.49 tokens per second)
+0.50.512.583 I slot print_timing: id  0 | task 3 |       total time =    1707.52 ms /    63 tokens
+0.50.512.583 I slot print_timing: id  0 | task 3 |    graphs reused =          1
+0.50.512.584 I slot print_timing: id  0 | task 3 |   graph reallocs =          0    /     0        (same size) / (changed size)
+0.50.512.586 I slot print_timing: id  0 | task 3 | draft acceptance = 0.80000 (    4 accepted /     5 generated), mean len =  2.33
+0.50.512.683 I slot      release: id  0 | task 3 | stop processing: n_tokens = 62, truncated = 0
+0.50.516.442 I slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.344 (> 0.100 thold), f_keep = 0.726
+0.50.516.470 I slot launch_slot_: id  0 | task 10 | processing task, is_child = 0
+0.57.852.166 I slot print_timing: id  0 | task 10 | n_gen =    100, tg =  18.35 t/s, tg_3s =  18.53 t/s
+45.53.251.771 I que    start_loop: entering sleeping state
+45.53.255.849 I srv  handle_sleep: server is entering sleeping state
+92.39.407.407 I que    start_loop: exiting sleeping state
+92.39.407.415 I srv  handle_sleep: server is exiting sleeping state
+92.39.407.479 I srv    load_model: loading model '/Users/me/models/qwen38/Qwen3.8-27B-Q4_0.gguf'
+92.49.454.773 I cmn          init: llama threadpool init, n_threads = 8
+92.49.982.561 I common_speculative_init_result: creating MTP draft context against the target model '/Users/me/models/qwen38/Qwen3.8-27B-Q4_0.gguf'
+92.50.132.388 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 65536, kv_unified = 'false'
+102.50.726.244 I que    start_loop: entering sleeping state
+102.50.729.564 I srv  handle_sleep: server is entering sleeping state
+107.22.979.415 I que    start_loop: exiting sleeping state
+107.22.979.421 I srv  handle_sleep: server is exiting sleeping state
+107.22.979.470 I srv    load_model: loading model '/Users/me/models/qwen38/Qwen3.8-27B-Q4_0.gguf'
+107.25.672.176 I cmn          init: llama threadpool init, n_threads = 8
+107.25.861.041 I common_speculative_init_result: creating MTP draft context against the target model '/Users/me/models/qwen38/Qwen3.8-27B-Q4_0.gguf'
+107.26.016.670 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 65536, kv_unified = 'false'
+107.26.144.274 I slot get_availabl: id  0 | task -1 | selected slot by LRU, n_tokens = 0, t_last = -1
+107.26.144.753 I slot launch_slot_: id  0 | task 315 | processing task, is_child = 0
+107.47.139.901 I slot print_timing: id  0 | task 315 | prompt processing, n_tokens =   2048, progress = 0.31, t =  15.48 s / 132.28 tokens per second
+108.08.646.306 I slot print_timing: id  0 | task 315 | prompt processing, n_tokens =   4096, progress = 0.61, t =  36.85 s / 111.14 tokens per second
+108.30.730.826 I slot print_timing: id  0 | task 315 | prompt processing, n_tokens =   6144, progress = 0.92, t =  58.79 s / 104.51 tokens per second
+108.31.067.862 I slot print_timing: id  0 | task 315 | prompt processing, n_tokens =   6156, progress = 0.92, t =  64.59 s / 95.31 tokens per second
+108.36.636.017 I slot print_timing: id  0 | task 315 | prompt processing, n_tokens =   6648, progress = 1.00, t =  64.96 s / 102.33 tokens per second
+108.37.153.541 I slot print_timing: id  0 | task 315 | prompt processing, n_tokens =   6668, progress = 1.00, t =  70.61 s / 94.43 tokens per second
+109.06.005.855 I slot print_timing: id  0 | task 315 | prompt eval time =   71194.64 ms /  6672 tokens (   10.67 ms per token,    93.71 tokens per second)
+109.06.005.856 I slot print_timing: id  0 | task 315 |        eval time =   28666.35 ms /   422 tokens (   68.09 ms per token,    14.69 tokens per second)
+109.06.005.857 I slot print_timing: id  0 | task 315 |       total time =   99860.99 ms /  7094 tokens
+109.06.005.858 I slot print_timing: id  0 | task 315 |    graphs reused =        173
+109.06.005.858 I slot print_timing: id  0 | task 315 |   graph reallocs =          0    /     0        (same size) / (changed size)
+109.06.005.861 I slot print_timing: id  0 | task 315 | draft acceptance = 0.70286 (  246 accepted /   350 generated), mean len =  2.41
+109.06.006.489 I slot      release: id  0 | task 315 | stop processing: n_tokens = 7093, truncated = 0

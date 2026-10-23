@@ -1,0 +1,43 @@
+# Qwen3.8-27B (hybrid Gated DeltaNet, built-in MTP) via unsloth GGUFs.
+# First tuned Oct 2026 on an M2 Pro / 32 GB: see ../qwen38-llamacpp/results.md
+
+[model]
+name = "Qwen3.8-27B"
+hf_repo = "unsloth/Qwen3.8-27B-GGUF"
+dir = "~/models/qwen38"
+candidates = ["Qwen3.8-27B-Q4_0.gguf", "Qwen3.8-27B-UD-Q4_K_M.gguf", "Qwen3.8-27B-UD-IQ4_XS.gguf"]
+extra_files = []  # MTP head is embedded in the main GGUFs; MTP/mtp-*.gguf measured no different
+
+# Fixed workload: model-card thinking-mode sampling (also the GGUF's general.sampling.* defaults)
+[sampling]
+temp = 1.0
+top_p = 0.95
+top_k = 20
+min_p = 0.0
+
+# Reasoning stays at template defaults (thinking on, effort xhigh, preserve on); never searched
+[reasoning]
+
+[workload]
+prompts = "../prompts/default.json"
+seeds = [1, 2, 3]
+max_tokens = 1024
+greedy_tokens = 256
+
+[serve]
+ctx = 65536
+parallel = 1
+host = "127.0.0.1"
+port = 8080
+
+[search]
+fa = ["off", "on"]
+ubatch = [512, 1024]
+kv_types = ["f16", "q8_0", "bf16"]
+depths = [0, 8192, 16384]
+spec_n_max = [1, 2, 3]
+spec_n_max_banned = [3]  # changed the model's output on Apple Silicon in earlier testing
+draft_sampling = ["greedy", "probabilistic"]
+draft_p_min = [0.5]
+cache_ram_mib = [0, 2048]
+reps = 2

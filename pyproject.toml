@@ -1,0 +1,64 @@
+[project]
+name = "lmtune"
+version = "0.1.0"
+description = "Find the fastest correct way to run a local LLM on this machine: measured, gated, reproducible."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.14"
+dependencies = []
+
+[project.urls]
+Repository = "https://github.com/ascalva/lmtune"
+
+[project.scripts]
+lmtune = "lmtune.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8", "pytest-cov>=6", "ruff>=0.14", "mypy>=1.18"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lmtune"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+
+[tool.coverage.run]
+source = ["lmtune"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+
+[tool.ruff]
+line-length = 120
+target-version = "py314"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF", "PL", "S", "BLE", "PTH", "TRY", "C4", "RET", "ARG"]
+ignore = [
+  "PLR0911", "PLR0912", "PLR0913", "PLR0915", "PLR2004",  # complexity/magic numbers: CLI + stats code
+  "S603", "S607",          # subprocess with a fixed argv list is the point of this tool
+  "S310",                  # urllib to loopback/HF only
+  "TRY003", "TRY300",      # message-bearing exceptions are fine here
+  "PTH123",                # open() is fine
+  "RUF001", "RUF002", "RUF003",  # intentional unicode (×, ✓, ⚠) in user-facing text
+]
+
+[tool.ruff.lint.per-file-ignores]
+# seeded `random` drives permutation tests and simulations, not secrets
+"src/lmtune/exact.py" = ["S311"]
+"tests/**" = ["S104", "S311", "S101", "S105", "S106", "S108", "PLR2004", "ARG", "BLE", "PTH"]
+
+[tool.mypy]
+python_version = "3.14"
+strict = true
+warn_unreachable = true
+files = ["src"]

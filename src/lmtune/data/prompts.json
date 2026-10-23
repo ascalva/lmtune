@@ -1,0 +1,26 @@
+[
+  {
+    "id": "code",
+    "messages": [
+      {"role": "user", "content": "Write a thread-safe Python LRU cache class with per-entry TTL expiry. Requirements: O(1) get/put, a max_size bound, lazy expiry on access plus a purge_expired() method, full type hints, and a docstring. Then write pytest unit tests covering eviction order, TTL expiry (use an injectable clock, not time.sleep), and concurrent access from multiple threads."}
+    ]
+  },
+  {
+    "id": "reasoning",
+    "messages": [
+      {"role": "user", "content": "Five engineers (Ana, Ben, Chloe, Dev, Eli) must each be assigned exactly one on-call week in a 5-week rotation (weeks 1-5). Constraints: (1) Ana cannot take week 1 or week 5. (2) Ben must be on call earlier than Chloe. (3) Dev and Eli cannot be in adjacent weeks. (4) Chloe is on call exactly two weeks after Ana. (5) Eli is not on call in week 3. (6) If Ben takes week 1, then Dev takes week 5. Find every valid assignment, prove there are no others, and then explain which single constraint, if removed, would increase the number of valid assignments the most."}
+    ]
+  },
+  {
+    "id": "prose",
+    "messages": [
+      {"role": "user", "content": "Write a 700-word short story about a lighthouse keeper on a remote island who discovers that the light has been signaling to something other than ships. Use a restrained, literary tone, concrete sensory detail, and end on an ambiguous note. Avoid cliches about storms."}
+    ]
+  },
+  {
+    "id": "refactor",
+    "messages": [
+      {"role": "user", "content": "Refactor the following JavaScript to use async/await instead of callbacks, keep behavior identical, add JSDoc comments, and return the complete refactored file.\n\n```js\nconst fs = require('fs');\nconst path = require('path');\nconst https = require('https');\n\nfunction readConfig(dir, cb) {\n  fs.readFile(path.join(dir, 'config.json'), 'utf8', function (err, data) {\n    if (err) return cb(err);\n    let cfg;\n    try { cfg = JSON.parse(data); } catch (e) { return cb(e); }\n    if (!cfg.endpoint) return cb(new Error('missing endpoint'));\n    cb(null, cfg);\n  });\n}\n\nfunction fetchJson(url, cb) {\n  https.get(url, function (res) {\n    if (res.statusCode !== 200) {\n      res.resume();\n      return cb(new Error('HTTP ' + res.statusCode));\n    }\n    let body = '';\n    res.setEncoding('utf8');\n    res.on('data', function (chunk) { body += chunk; });\n    res.on('end', function () {\n      try { cb(null, JSON.parse(body)); } catch (e) { cb(e); }\n    });\n  }).on('error', cb);\n}\n\nfunction writeReport(dir, items, cb) {\n  const lines = items.map(function (it) { return it.id + '\\t' + it.name + '\\t' + it.score; });\n  fs.writeFile(path.join(dir, 'report.tsv'), lines.join('\\n'), function (err) {\n    if (err) return cb(err);\n    cb(null, lines.length);\n  });\n}\n\nfunction run(dir, cb) {\n  readConfig(dir, function (err, cfg) {\n    if (err) return cb(err);\n    fetchJson(cfg.endpoint + '/items', function (err, items) {\n      if (err) return cb(err);\n      const filtered = items.filter(function (it) { return it.score >= (cfg.minScore || 0); });\n      filtered.sort(function (a, b) { return b.score - a.score; });\n      writeReport(dir, filtered, function (err, n) {\n        if (err) return cb(err);\n        cb(null, { written: n, skipped: items.length - n });\n      });\n    });\n  });\n}\n\nmodule.exports = { readConfig, fetchJson, writeReport, run };\n```"}
+    ]
+  }
+]

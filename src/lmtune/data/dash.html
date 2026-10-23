@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="lmtune">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M7 21l5-6 4 4 4-8 5 10' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<title>lmtune dash</title>
+<!-- lmtune dash: served by `lmtune dash`; the inline style and script are allowed by hash (CSP), nothing else loads. -->
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --ring: rgba(11, 11, 11, .10); --track: #f0efec;
+  --accent: #2a78d6; --accent-wash: rgba(42, 120, 214, .10);
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+  --good: #0ca30c; --warning: #fab219; --serious: #ec835a; --critical: #d03b3b;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --ring: rgba(255, 255, 255, .10); --track: #2c2c2a;
+    --accent: #3987e5; --accent-wash: rgba(57, 135, 229, .14);
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--page); color: var(--ink);
+  font: 15px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+  padding: env(safe-area-inset-top) max(16px, env(safe-area-inset-right)) 32px max(16px, env(safe-area-inset-left));
+}
+header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 16px 0 12px; }
+h1 { font-size: 17px; font-weight: 600; margin: 0; }
+h2 { font-size: 13px; font-weight: 600; color: var(--ink2); margin: 0 0 10px; text-transform: uppercase; letter-spacing: .04em; }
+.muted { color: var(--muted); }
+.ink2 { color: var(--ink2); }
+.label { font-size: 12px; color: var(--muted); margin-top: 12px; }
+#updated { font-size: 13px; color: var(--muted); white-space: nowrap; }
+#updated.stale { color: var(--critical); }
+main { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr)); }
+.card { background: var(--surface); border: 1px solid var(--ring); border-radius: 12px; padding: 14px; min-width: 0; }
+.wide { grid-column: 1 / -1; }
+.state { display: flex; align-items: center; gap: 8px 10px; flex-wrap: wrap; }
+.pill {
+  display: inline-flex; align-items: center; gap: 6px; font-weight: 600; border-radius: 999px;
+  padding: 3px 10px 3px 8px; border: 1px solid var(--ring); max-width: 100%;
+}
+.pill.big { font-size: 20px; padding: 4px 14px 4px 10px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); flex: none; }
+.big .dot { width: 12px; height: 12px; }
+.good .dot { background: var(--good); }
+.warning .dot { background: var(--warning); }
+.serious .dot { background: var(--serious); }
+.critical .dot { background: var(--critical); }
+.accent .dot { background: var(--accent); }
+.state.gap { margin-top: 10px; }
+.sub { color: var(--ink2); font-size: 14px; margin-top: 6px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 12px; }
+.tile { border-top: 1px solid var(--grid); padding-top: 8px; min-width: 0; }
+.tile .label { margin-top: 0; }
+.tile .value { font-size: 22px; font-weight: 600; line-height: 1.2; }
+.tile .value small { font-size: 13px; font-weight: 500; color: var(--ink2); }
+.tile .note { font-size: 12px; color: var(--ink2); }
+.spark { display: block; width: 100%; height: 36px; margin-top: 4px; overflow: visible; touch-action: none; }
+.meter { height: 8px; border-radius: 4px; background: var(--track); overflow: hidden; display: flex; gap: 2px; margin: 8px 0 6px; }
+.meter span { display: block; height: 100%; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--ink2); }
+.key { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -14px; padding: 0 14px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; font-variant-numeric: tabular-nums; }
+th { font-weight: 500; color: var(--muted); text-align: right; padding: 4px 6px; white-space: nowrap; border-bottom: 1px solid var(--grid); }
+td { text-align: right; padding: 5px 6px; white-space: nowrap; border-bottom: 1px solid var(--grid); }
+th:first-child, td:first-child { text-align: left; padding-left: 0; }
+tr:last-child td { border-bottom: 0; }
+tr.hot td { background: var(--accent-wash); }
+.list { list-style: none; margin: 0; padding: 0; }
+.list li {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  padding: 7px 0; border-bottom: 1px solid var(--grid); min-width: 0;
+}
+.list li:last-child { border-bottom: 0; }
+.list .name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.list .meta { font-size: 12px; color: var(--ink2); text-align: right; white-space: nowrap; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--ring); border-radius: 999px;
+  padding: 2px 10px 2px 8px; font-size: 13px;
+}
+.chip .dot { width: 8px; height: 8px; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.links { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.bars { display: flex; align-items: flex-end; gap: 2px; height: 56px; margin-top: 6px; border-bottom: 1px solid var(--grid); }
+.bars span { flex: 1 1 0; max-width: 24px; min-width: 3px; background: var(--accent); border-radius: 4px 4px 0 0; }
+.tip {
+  position: fixed; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--ring);
+  border-radius: 8px; padding: 6px 8px; font-size: 12px; box-shadow: 0 2px 10px rgba(0, 0, 0, .15);
+  display: none; z-index: 9; white-space: nowrap;
+}
+.err { font-size: 12px; color: var(--ink2); margin-top: 8px; }
+.err b { color: var(--critical); font-weight: 600; }
+</style>
+</head>
+<body>
+<header><h1><span id="host">lmtune</span> · AI stack</h1><span id="updated">loading…</span></header>
+<main id="main"></main>
+<script>
+"use strict";
+// Everything below builds DOM nodes with textContent: nothing from the server is parsed as HTML.
+const $ = (id) => document.getElementById(id);
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k === "class") e.className = v;
+    else if (k === "text") e.textContent = v;
+    else e.setAttribute(k, v);
+  }
+  for (const k of kids.flat()) {
+    if (k === null || k === undefined || k === false) continue;
+    e.append(typeof k === "string" || typeof k === "number" ? String(k) : k);
+  }
+  return e;
+}
+const SVG = "http://www.w3.org/2000/svg";
+function s(tag, attrs) {
+  const e = document.createElementNS(SVG, tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  return e;
+}
+const none = (v) => v === null || v === undefined;
+const fmt = {
+  n(v, d = 0) {
+    return none(v) ? "—" : Number(v).toLocaleString(undefined, {maximumFractionDigits: d, minimumFractionDigits: d});
+  },
+  k(v) {
+    if (none(v)) return "—";
+    if (v >= 10000) return (v / 1000).toFixed(0) + "K";
+    return v >= 1000 ? (v / 1000).toFixed(1) + "K" : String(v);
+  },
+  pct(v, d = 0) { return none(v) ? "—" : (v * 100).toFixed(d) + "%"; },
+  gb(b, d = 1) { return none(b) ? "—" : (b / 2 ** 30).toFixed(d) + " GB"; },
+  mb(b) {
+    if (none(b)) return "—";
+    return b >= 2 ** 30 ? (b / 2 ** 30).toFixed(1) + " GB" : (b / 2 ** 20).toFixed(0) + " MB";
+  },
+  dur(sec) {
+    if (none(sec)) return "—";
+    sec = Math.max(0, Math.round(sec));
+    if (sec < 60) return sec + " s";
+    if (sec < 600) return Math.floor(sec / 60) + " min " + (sec % 60) + " s";
+    if (sec < 3600) return Math.floor(sec / 60) + " min";
+    if (sec < 86400) return Math.floor(sec / 3600) + " h " + Math.floor((sec % 3600) / 60) + " min";
+    return Math.floor(sec / 86400) + " d";
+  },
+  time(t) { return t ? new Date(t * 1000).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"}) : "—"; },
+  ago(t, now) { return t ? fmt.dur(now - t) + " ago" : "—"; },
+};
+// state -> [status level, label]; every status shows a dot AND a word, never color alone
+const STATES = {
+  busy: ["accent", "Busy"], idle: ["good", "Idle"], asleep: ["", "Asleep"], waking: ["warning", "Waking up"],
+  loading: ["warning", "Loading"], stopped: ["critical", "Stopped"], down: ["critical", "Not answering"],
+  error: ["critical", "Error"],
+};
+function pill(level, label, big) {
+  return h("span", {class: "pill " + level + (big ? " big" : "")}, h("span", {class: "dot"}), label);
+}
+function tile(label, value, unit, note, extra) {
+  return h("div", {class: "tile"},
+    h("div", {class: "label", text: label}),
+    h("div", {class: "value"}, value, unit ? h("small", {text: " " + unit}) : null),
+    note ? h("div", {class: "note", text: note}) : null,
+    extra || null);
+}
+
+const tip = h("div", {class: "tip", role: "status"});
+document.body.append(tip);
+function showTip(ev, text) {
+  tip.textContent = text;
+  tip.style.display = "block";
+  const x = Math.min(ev.clientX + 12, window.innerWidth - tip.offsetWidth - 8);
+  tip.style.left = Math.max(8, x) + "px";
+  tip.style.top = Math.max(8, ev.clientY - tip.offsetHeight - 10) + "px";
+}
+function hideTip() { tip.style.display = "none"; }
+function hover(el, textAt) {
+  const show = (ev) => { const t = textAt(ev); if (t) showTip(ev, t); };
+  el.addEventListener("pointermove", show);
+  el.addEventListener("pointerdown", show);
+  el.addEventListener("pointerleave", hideTip);
+}
+
+// 2px line + 10% wash, one series; hover (or tap) reads the value at that time
+function spark(points, max, label, unit, digits = 0) {
+  const W = 200, H = 36, n = points.length;
+  const svg = s("svg", {class: "spark", viewBox: `0 0 ${W} ${H}`, preserveAspectRatio: "none", role: "img", "aria-label": label});
+  const ok = points.filter((p) => !none(p.v));
+  if (ok.length < 2) return svg;
+  const top = Math.max(max || 0, ...ok.map((p) => p.v)) || 1;
+  let d = "", first = null, last = null;
+  points.forEach((p, i) => {
+    if (none(p.v)) return;
+    const x = (i / (n - 1)) * W, y = H - 2 - (p.v / top) * (H - 4);
+    d += (d ? "L" : "M") + x.toFixed(1) + " " + y.toFixed(1);
+    if (first === null) first = x;
+    last = x;
+  });
+  svg.append(s("path", {d: `${d}L${last.toFixed(1)} ${H}L${first.toFixed(1)} ${H}Z`, fill: "var(--accent)", "fill-opacity": "0.10"}));
+  svg.append(s("path", {d, fill: "none", stroke: "var(--accent)", "stroke-width": "2", "stroke-linejoin": "round",
+    "stroke-linecap": "round", "vector-effect": "non-scaling-stroke"}));
+  hover(svg, (ev) => {
+    const r = svg.getBoundingClientRect();
+    const p = points[Math.max(0, Math.min(n - 1, Math.round(((ev.clientX - r.left) / r.width) * (n - 1))))];
+    return p ? `${fmt.time(p.t)}  ${none(p.v) ? "—" : fmt.n(p.v, digits) + unit}` : null;
+  });
+  return svg;
+}
+function errLine(name, errors) {
+  return errors && errors[name] ? h("div", {class: "err"}, h("b", {text: "unavailable: "}), errors[name]) : null;
+}
+function linkOf(st, key) {
+  const local = ["127.0.0.1", "localhost", "[::1]"].includes(location.hostname);
+  return ((st.links || {})[local ? "local" : "tailnet"] || {})[key] || null;
+}
+
+function modelCard(st) {
+  const sv = st.server || {}, now = st.generated;
+  const [lvl, label] = STATES[sv.state] || ["", sv.state || "unknown"];
+  const a = (sv.active || [])[0];
+  let sub = "";
+  if (sv.state === "busy" && a) {
+    sub = a.phase === "prefill"
+      ? `Reading the prompt · ${fmt.pct(a.progress)} · ${fmt.n(a.live_tps)} tok/s`
+      : `Writing · ${fmt.n(a.gen_tokens)} tokens · ${fmt.n(a.live_tps, 1)} tok/s now`;
+    sub += ` · ${fmt.dur(a.elapsed_s)}`;
+  } else if (sv.state === "busy") sub = "Processing a request";
+  else if (sv.state === "idle") {
+    sub = none(sv.sleeps_in_s) ? "Model loaded" : `Model loaded · unloads in ≈${fmt.dur(sv.sleeps_in_s)} if unused`;
+  } else if (sv.state === "asleep") {
+    sub = "Model unloaded to free memory" + (sv.lifecycle_at ? " " + fmt.ago(sv.lifecycle_at, now) : "")
+      + " · the next request wakes it";
+  } else if (sv.state === "waking") sub = "Loading the model back into memory for a request";
+  else if (sv.state === "loading") sub = "Server starting, model loading";
+  else if (sv.state === "stopped") sub = "Not running · lmtune serve start";
+  else if (sv.state === "down") sub = "launchd runs it but it doesn't answer · lmtune serve logs";
+  if (sv.managed === false && sv.health) sub += " · started outside lmtune (no launchd agent): request history is from the last managed run";
+
+  const m = sv.metrics, sum = sv.summary || {};
+  const tiles = h("div", {class: "tiles"},
+    tile("Decode", fmt.n(sum.gen_tps, 1), "tok/s", `median of the last ${sum.requests || 0}`),
+    tile("Prompt", fmt.n(sum.prompt_tps, 0), "tok/s", "median prefill speed"),
+    tile("MTP acceptance", fmt.pct(sum.acceptance), null, "draft tokens kept"),
+    m ? tile("Queue", fmt.n(m.deferred), "waiting", `${fmt.k(m.gen_tokens)} tokens written since start`) : null,
+    tile("Server memory", fmt.gb(sv.footprint_bytes), null, `RSS ${fmt.gb(sv.rss_bytes)} · CPU ${fmt.n(sv.cpu_pct)}%`));
+
+  const reqs = (sv.requests || []).slice(0, 24).reverse();  // oldest -> newest
+  const bars = h("div", {class: "bars", role: "img", "aria-label": "decode speed of recent requests"});
+  const top = Math.max(1, ...reqs.map((r) => r.gen_tps || 0));
+  for (const r of reqs) {
+    const b = h("span");
+    b.style.height = Math.max(4, ((r.gen_tps || 0) / top) * 56) + "px";
+    const text = `${fmt.time(r.started)} · ${fmt.n(r.gen_tps, 1)} tok/s · ${fmt.k(r.gen_tokens)} tokens · MTP ${fmt.pct(r.acceptance)}`;
+    hover(b, () => text);
+    bars.append(b);
+  }
+  return h("section", {class: "card wide"},
+    h("div", {class: "state"}, pill(lvl, label, true),
+      h("span", {class: "ink2"}, sv.model || "", sv.build ? h("span", {class: "muted", text: "  " + sv.build}) : null)),
+    h("div", {class: "sub", text: sub}),
+    tiles,
+    reqs.length > 1 ? [h("div", {class: "label", text: "Decode tok/s per request, oldest → newest"}), bars] : null,
+    errLine("server", st.errors));
+}
+
+function requestsCard(st) {
+  const sv = st.server || {}, rows = [...(sv.active || []), ...(sv.requests || [])].slice(0, 15);
+  const head = ["Time", "Decode tok/s", "MTP", "Prompt tok/s", "Output", "New prompt", "Total"];
+  const table = h("table", {},
+    h("thead", {}, h("tr", {}, head.map((t) => h("th", {text: t})))),
+    h("tbody", {}, rows.map((r) => {
+      const live = r.phase !== "done";
+      return h("tr", {class: live ? "hot" : null},
+        h("td", {text: live ? "now" : fmt.time(r.started)}),
+        h("td", {text: fmt.n(r.gen_tps ?? (r.phase === "decode" ? r.live_tps : null), 1)}),
+        h("td", {text: fmt.pct(r.acceptance)}),
+        h("td", {text: fmt.n(r.prompt_tps ?? (r.phase === "prefill" ? r.live_tps : null))}),
+        h("td", {text: fmt.k(r.gen_tokens)}),
+        h("td", {text: fmt.k(r.prompt_tokens)}),
+        h("td", {text: fmt.dur(r.elapsed_s)}));
+    })));
+  return h("section", {class: "card wide"}, h("h2", {text: "Recent requests"}),
+    rows.length ? h("div", {class: "scroll"}, table) : h("div", {class: "muted", text: "No requests since the server started."}),
+    h("div", {class: "err muted", text: "From the server log. New prompt: tokens not reused from the cache. No prompt or reply text is ever shown."}));
+}
+
+function systemCard(st) {
+  const sy = st.system || {}, mem = sy.memory || {}, bd = mem.breakdown, gpu = sy.gpu || {}, hist = st.history || [];
+  const plevel = {normal: "good", warning: "warning", critical: "critical"}[mem.pressure] || "";
+  let meter = null, legend = null;
+  if (bd && mem.ram_bytes) {
+    const parts = [["App", bd.app, "--s1"], ["Wired", bd.wired, "--s2"], ["Compressed", bd.compressed, "--s3"],
+      ["Cached files", bd.cached, "--s4"]];
+    meter = h("div", {class: "meter", role: "img", "aria-label": "memory use"});
+    legend = h("div", {class: "legend"});
+    for (const [name, b, c] of parts) {
+      const seg = h("span");
+      seg.style.width = ((b / mem.ram_bytes) * 100).toFixed(2) + "%";
+      seg.style.background = `var(${c})`;
+      meter.append(seg);
+      const key = h("span", {class: "key"});
+      key.style.background = `var(${c})`;
+      legend.append(h("span", {}, key, `${name} ${fmt.gb(b)}`));
+    }
+  }
+  const series = (f) => hist.map((p) => ({t: p.t, v: f(p)}));
+  return h("section", {class: "card"}, h("h2", {text: "This Mac"}),
+    h("div", {class: "state"}, pill(plevel, "Memory pressure " + (mem.pressure || "unknown")),
+      h("span", {class: "ink2", text: `${fmt.n(mem.free_pct)}% free of ${fmt.gb(mem.ram_bytes, 0)}`})),
+    meter, legend,
+    h("div", {class: "tiles"},
+      tile("Swap used", fmt.gb(mem.swap_used_bytes), null, mem.swap_total_bytes ? `of ${fmt.gb(mem.swap_total_bytes)}` : null,
+        spark(series((p) => none(p.swap_used_bytes) ? null : p.swap_used_bytes / 2 ** 30),
+          (mem.swap_total_bytes || 0) / 2 ** 30, "swap used, recent", " GB", 1)),
+      tile("CPU", fmt.n(sy.cpu_pct), "%", `load ${fmt.n(sy.load1, 1)} · ${sy.cpus || "?"} cores`,
+        spark(series((p) => p.cpu_pct), 100, "CPU busy, recent", "%")),
+      tile("GPU", fmt.n(gpu.device_pct), "%", none(gpu.in_use_bytes) ? null : `${fmt.gb(gpu.in_use_bytes)} in use`,
+        spark(series((p) => p.gpu_pct), 100, "GPU busy, recent", "%"))),
+    errLine("system", st.errors));
+}
+
+function stackCard(st) {
+  const k = st.stack || {}, cs = k.containers || [], vm = k.vm || {}, tor = k.tor, engines = k.searxng || [];
+  const list = h("ul", {class: "list"}, cs.map((c) => h("li", {},
+    h("span", {class: "name"}, pill(c.state === "running" ? "good" : "critical", c.name.replace(/^lmtune-/, "")),
+      c.ours ? null : h("span", {class: "muted", text: " not lmtune's"})),
+    h("span", {class: "meta"},
+      none(c.mem_bytes) ? "" : fmt.mb(c.mem_bytes) + (c.mem_limit_bytes ? " / " + fmt.mb(c.mem_limit_bytes) : ""),
+      h("br"), c.state === "running" ? c.status : c.state))));
+  let torPill = pill("", "Tor: no data");
+  if (tor && !tor.running) torPill = pill("critical", "Tor: not running");
+  else if (tor && tor.bootstrap_pct === 100) torPill = pill("good", "Tor: connected");
+  else if (tor) torPill = pill("warning", `Tor: ${tor.bootstrap_pct ?? 0}% bootstrapped`);
+  const chips = h("div", {class: "chips"}, engines.map((e) => {
+    const kinds = Object.entries(e.errors || {}), n = kinds.reduce((a, [, v]) => a + v, 0);
+    const hard = kinds.some(([kind]) => ["blocked", "captcha", "rate-limited", "suspended"].includes(kind));
+    return h("span", {class: "chip " + (n === 0 ? "good" : hard ? "serious" : "warning")}, h("span", {class: "dot"}), e.name,
+      n ? h("span", {class: "muted", text: kinds.map(([kind, v]) => `${v} ${kind}`).join(", ")}) : null);
+  }));
+  let vmMeter = null;
+  if (vm.available_bytes && vm.total_bytes) {
+    vmMeter = h("div", {class: "meter", role: "img", "aria-label": "podman VM memory in use"});
+    const used = h("span");
+    used.style.width = ((1 - vm.available_bytes / vm.total_bytes) * 100).toFixed(1) + "%";
+    used.style.background = "var(--accent)";
+    vmMeter.append(used);
+  }
+  return h("section", {class: "card"}, h("h2", {text: "Research stack (podman)"}),
+    h("div", {class: "ink2", text: `VM memory: ${fmt.mb(vm.available_bytes)} available of ${fmt.mb(vm.total_bytes)}`}), vmMeter,
+    cs.length ? list : h("div", {class: "muted", text: "No containers (is the podman machine running?)"}),
+    h("div", {class: "state gap"}, torPill,
+      tor && tor.warnings_1h ? h("span", {class: "ink2", text: `${tor.warnings_1h} warnings in the last hour`}) : null),
+    h("div", {class: "label", text: "Search engines: errors in the last 30 min"}), chips,
+    ["containers", "vm", "tor", "searxng"].map((n) => errLine(n, st.errors)));
+}
+
+function tailnetCard(st) {
+  const t = st.tailnet || {}, now = st.generated;
+  const funnel = (t.exposures || []).some((e) => e.funnel), wide = (t.listeners || []).filter((l) => !l.loopback);
+  const ex = h("ul", {class: "list"}, (t.exposures || []).map((e) => h("li", {},
+    h("span", {class: "name"}, h("a", {href: e.url, text: e.url.replace(/^https:\/\//, "")})),
+    h("span", {class: "meta"}, "→ " + String(e.target).replace(/^http:\/\//, ""),
+      e.funnel ? [h("br"), pill("critical", "PUBLIC (Funnel)")] : null))));
+  const peers = h("ul", {class: "list"}, (t.peers || []).map((p) => h("li", {},
+    h("span", {class: "name"}, pill(p.active ? "accent" : p.online ? "good" : "", p.name), h("span", {class: "muted", text: " " + p.os})),
+    h("span", {class: "meta"},
+      p.active ? `connected · ${p.direct ? "direct" : "relay " + p.relay}` : p.online ? "online" : "offline",
+      h("br"), p.last_handshake ? "handshake " + fmt.ago(p.last_handshake, now) : p.ip))));
+  return h("section", {class: "card"}, h("h2", {text: "Tailnet"}),
+    h("div", {class: "state"},
+      funnel ? pill("critical", "Funnel is ON: public internet") : pill("good", "Tailnet-only, no Funnel"),
+      wide.length ? pill("critical", "Beyond loopback: " + wide.map((l) => l.addr).join(", ")) : pill("good", "Ports on loopback only")),
+    h("div", {class: "label", text: "Exposed with tailscale serve"}), ex,
+    h("div", {class: "label", text: "Devices (connected = an active WireGuard session)"}), peers,
+    errLine("tailnet", st.errors));
+}
+
+function linksCard(st) {
+  const a = (key, label) => {
+    const u = linkOf(st, key);
+    return u ? h("a", {href: u, target: "_blank", rel: "noopener noreferrer", text: label}) : null;
+  };
+  return h("section", {class: "card wide"}, h("div", {class: "links"},
+    a("webui", "Open WebUI"), a("analytics", "Usage by user and model: Open WebUI → Admin → Analytics"), a("llama", "llama.cpp UI")));
+}
+
+let last = null, timer = null, failing = false;
+function render(st) {
+  last = st;
+  $("main").replaceChildren(modelCard(st), requestsCard(st), systemCard(st), stackCard(st), tailnetCard(st), linksCard(st));
+  $("host").textContent = (st.host || "").split(".")[0] || "lmtune";
+  document.title = `${(STATES[(st.server || {}).state] || ["", "?"])[1]} · lmtune dash`;
+}
+function tick() {
+  if (!last) return;
+  const age = Date.now() / 1000 - last.generated, el = $("updated");
+  el.textContent = failing ? `offline · last update ${fmt.dur(age)} ago` : `updated ${fmt.dur(age)} ago`;
+  el.className = failing || age > 3 * (last.refresh_s || 3) ? "stale" : "";
+}
+async function poll() {
+  clearTimeout(timer);
+  try {
+    const r = await fetch("api/state", {cache: "no-store"});
+    if (!r.ok) throw new Error(String(r.status));
+    render(await r.json());
+    failing = false;
+  } catch (e) {
+    failing = true;
+  }
+  tick();
+  if (!document.hidden) timer = setTimeout(poll, ((last && last.refresh_s) || 3) * 1000);
+}
+// a hidden tab (or a locked phone) stops polling, so nothing is collected for nobody
+document.addEventListener("visibilitychange", () => { if (document.hidden) clearTimeout(timer); else poll(); });
+setInterval(tick, 1000);
+poll();
+</script>
+</body>
+</html>

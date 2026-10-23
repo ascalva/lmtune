@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+runs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+dist/
+*.egg-info/
+.DS_Store
+# personal operational notes (device names, addresses, backlog): never published
+docs/private/
