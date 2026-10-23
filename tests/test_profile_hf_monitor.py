@@ -1,4 +1,5 @@
 import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -75,6 +76,7 @@ def test_sha256(tmp_path):
     assert hf.sha256(p) == "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
 
 
+@pytest.mark.skipif(sys.platform != "darwin", reason="Monitor samples with macOS `footprint`")
 def test_monitor_samples_process():
     proc = subprocess.Popen(["sleep", "2"])
     with monitor.Monitor(proc.pid, interval=0.2) as mon:
@@ -83,6 +85,7 @@ def test_monitor_samples_process():
     assert mon.peak_rss_mb is not None
 
 
+@pytest.mark.skipif(sys.platform != "darwin", reason="Monitor samples with macOS `footprint`")
 def test_monitor_swap_guard_kills(monkeypatch):
     vals = iter([1000.0] + [1000.0 + 300 * i for i in range(1, 50)])
     monkeypatch.setattr(monitor, "swap_used_mb", lambda: next(vals))
@@ -93,6 +96,7 @@ def test_monitor_swap_guard_kills(monkeypatch):
     assert proc.returncode != 0  # SIGTERM'd
 
 
+@pytest.mark.skipif(sys.platform != "darwin", reason="Monitor samples with macOS `footprint`")
 def test_monitor_follows_and_kills_child_of_wrapper(monkeypatch):
     vals = iter([1000.0] + [1000.0 + 300 * i for i in range(1, 50)])
     monkeypatch.setattr(monitor, "swap_used_mb", lambda: next(vals))

@@ -199,7 +199,9 @@ def test_tailscale_never_uses_funnel():
 # -- supervisor -------------------------------------------------------------------------------
 
 
-def test_status_running_sleeping(cfg, paths):
+def test_status_running_sleeping(cfg, paths, monkeypatch):
+    # the CLI's location must come from the fake, not from whatever this machine has installed
+    monkeypatch.setattr(tailscale, "binary", lambda: "/bin/tailscale")
     srv = serve.Server(cfg, paths, FakeRunner(), fake_http())
     st = srv.status()
     # busy is not asked while sleeping: /slots would wake the model (see test_dash)
